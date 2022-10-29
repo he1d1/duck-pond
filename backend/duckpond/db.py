@@ -90,7 +90,7 @@ class DB:
           ''')
         cursor.execute('''
           CREATE TABLE IF NOT EXISTS places_visited
-          ([ID] INTEGER PRIMARY KEY, [userID] INTEGER, [entryID] INTEGER)
+          ([ID] INTEGER PRIMARY KEY, [userID] INTEGER FOREIGN KEY, [entryID] INTEGER FOREIGN KEY)
           ''')
 
         cursor.commit()
