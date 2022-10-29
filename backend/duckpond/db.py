@@ -181,3 +181,8 @@ class DB:
             array_locations.append(x[2])
         return array_locations
         #should return a list of IDs of places the user has visited
+    
+    def deleteUserLocation(self, ID):
+        cursor = self.conn.cursor()
+        cursor.execute('DELETE FROM places_visited WHERE ID = ?', ID)
+        cursor.commit()
