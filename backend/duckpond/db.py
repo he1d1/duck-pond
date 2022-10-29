@@ -1,4 +1,48 @@
 import sqlite3
+from dataclasses import dataclass
+from typing import *
+import urllib
+
+@dataclass
+class Entry:
+    id: str
+    name: str
+    location_lat: float
+    location_long: float
+    votes: int
+    image_url: Optional[str]
+
+    def validate(self, only_populated_fields=False) -> Tuple[bool, str]:
+        if self.name == "" and not only_populated_fields:
+            return False, "name cannot be empty"
+        
+        if self.votes < 0:
+            return False, "votes cannot be negative"
+
+        if self.image_url is not None:
+            try:
+                urllib.parse.urlparse(self.image_url)
+            except Exception:
+                return False, "invalid URL"
+
+        return True, ""
+
+    def as_dict(self) -> Dict:
+        res = {}
+
+        res["id"] = self.id
+        res["name"] = self.name
+        res["location"] = {
+            "lat": self.location_lat,
+            "long": self.location_long,
+        }
+        res["votes"] = self.votes
+
+        if self.image_url is not None:
+            res["imageURL"] = self.image_url
+
+        return res
+
 
 class DB:
     conn: sqlite3.Connection
