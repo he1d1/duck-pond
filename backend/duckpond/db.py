@@ -46,6 +46,30 @@ class Entry:
 
         return res
 
+@dataclass
+class User:
+    id: str
+    username: str
+    password_salt: str
+    password_hash: str
+
+    def validate(self, only_populated_fields=False) -> Tuple[bool, str]:
+        if (self.username == "" or self.username is None) and not only_populated_fields:
+            return False, "name cannot be empty"
+
+        return True, ""
+    
+    def as_dict(self) -> Dict:
+        res = {}
+
+        res["id"] = self.id
+        res["username"] = self.username
+        res["password_salt"] = self.password_salt
+        res["password_hash"] = self.password_hash
+
+        return res
+
+    
 
 class DB:
     conn: sqlite3.Connection
@@ -120,4 +144,28 @@ class DB:
 
         cursor = self.conn.cursor()
         cursor.execute('UPDATE entries SET title = ?, latitude = ?, longitude = ?, votes = ?, image_url = ?;', updateArray)
+        cursor.commit()
+    
+    def getUser(self, ID):
+        cursor = self.conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE ID = ?', ID)
+
+        result = cursor.fetchall()
+        user = User(result[0], result[1], result[2], result[3])
+
+        return user
+
+    def addUser(self, User):
+        username = User.name
+        password_salt = User.password_salt
+        password_hash = User.password_hash
+        insertArray = [username, password_salt, password_hash]
+
+        cursor = self.conn.cursor()
+        cursor.execute('INSERT INTO user (username, password_salt, password_hash) VALUES (?, ?, ?);', insertArray)
+        cursor.commit()
+
+    def deleteUser(self, ID):
+        cursor = self.conn.cursor()
+        cursor.execute('DELETE FROM users WHERE ID = ?', ID)
         cursor.commit()
