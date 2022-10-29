@@ -18,20 +18,17 @@ class Endpoints:
         app.add_url_rule(paths.CREATE_ENTRY, view_func=self.create_entry, methods=["POST"])
 
     def list_entries(self):
-       # TODO: populate from databaase 
+        entries = self.db.getAllEntries()
 
-        a = db.Entry("203fc6a0-9587-41a4-9862-e1b72039b98b", "Birmingham Duck Pond", -1.2345, 33.4567, 0, None)
-        b = db.Entry("b140e048-ea2c-4827-b670-ef41ba48c56d", "Northwich Duck Pond", -3.2345, 25.4567, 0, None)
+        for i in range(len(entries)):
+            entries[i] = entries[i].as_dict()
 
-        return flask.jsonify([a.as_dict(), b.as_dict()])
+        return flask.jsonify(entries)
 
     def get_entry(self, entry_id: str):
-        # TODO: Fetch from database
+        entry = self.get_entry(entry_id)
 
-        return flask.jsonify({
-            "id": entry_id,
-            "TODO": "TODO"
-        })
+        return flask.jsonify(entry.as_dict())
 
     def update_entry(self):
         return "", 204
@@ -58,9 +55,8 @@ class Endpoints:
         if not validation_result:
             return flask.abort(400, error_text)
 
-        # TODO: store in database
-        # TODO: Form responses
+        self.addEntry(new_entry)
 
         return flask.jsonify({
-            "id": uuid.uuidv4()
+            "id": new_entry.id
         })
