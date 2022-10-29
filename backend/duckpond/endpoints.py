@@ -18,12 +18,12 @@ class Endpoints:
         app.add_url_rule(paths.CREATE_ENTRY, view_func=self.create_entry, methods=["POST"])
 
     def list_entries(self):
-       # TODO: populate from databaase 
+        entries = self.db.getAllEntries()
 
-        a = db.Entry("203fc6a0-9587-41a4-9862-e1b72039b98b", "Birmingham Duck Pond", -1.2345, 33.4567, 0, None)
-        b = db.Entry("b140e048-ea2c-4827-b670-ef41ba48c56d", "Northwich Duck Pond", -3.2345, 25.4567, 0, None)
+        for i in range(len(entries)):
+            entries[i] = entries[i].as_dict()
 
-        return flask.jsonify([a.as_dict(), b.as_dict()])
+        return flask.jsonify(entries)
 
     def get_entry(self, entry_id: str):
         # TODO: Fetch from database
