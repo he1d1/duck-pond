@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import *
 import urllib
 
+
 @dataclass
 class Entry:
     id: str
@@ -15,7 +16,7 @@ class Entry:
     def validate(self, only_populated_fields=False) -> Tuple[bool, str]:
         if (self.name == "" or self.name is None) and not only_populated_fields:
             return False, "name cannot be empty"
-        
+
         if self.votes < 0:
             return False, "votes cannot be negative"
 
@@ -46,6 +47,7 @@ class Entry:
 
         return res
 
+
 @dataclass
 class User:
     id: str
@@ -58,7 +60,7 @@ class User:
             return False, "name cannot be empty"
 
         return True, ""
-    
+
     def as_dict(self) -> Dict:
         res = {}
 
@@ -69,13 +71,13 @@ class User:
 
         return res
 
-    
 
 class DB:
     conn: sqlite3.Connection
 
     def __init__(self, filename: str):
-        self.conn = sqlite3.connect(filename)
+        self.conn = sqlite3.connect(filename, check_same_thread=False)
+        self._setup()
 
     def _setup(self):
         cursor = self.conn.cursor()
@@ -90,10 +92,11 @@ class DB:
           ''')
         cursor.execute('''
           CREATE TABLE IF NOT EXISTS places_visited
-          ([ID] INTEGER PRIMARY KEY, [userID] INTEGER FOREIGN KEY, [entryID] INTEGER FOREIGN KEY)
+          ([ID] INTEGER PRIMARY KEY, [userID] INTEGER, [entryID] INTEGER)
           ''')
 
-        cursor.commit()
+        self.conn.commit()
+        cursor.close()
 
     def getAllEntries(self):
         arrayEntries = []
@@ -101,6 +104,7 @@ class DB:
         cursor.execute('SELECT * FROM entries')
 
         result = cursor.fetchall()
+        cursor.close()
 
         for x in result:
             entry = Entry(x[0], x[1], x[2], x[3], x[4], x[5])
@@ -112,7 +116,9 @@ class DB:
         cursor.execute('SELECT * FROM entries WHERE ID = ?', ID)
 
         result = cursor.fetchall()
-        entry = Entry(result[0], result[1], result[2], result[3], result[4], result[5])
+        cursor.close()
+        entry = Entry(result[0], result[1], result[2],
+                      result[3], result[4], result[5])
 
         return entry
 
@@ -125,13 +131,16 @@ class DB:
         insertArray = [title, latitude, longitude, votes, image_url]
 
         cursor = self.conn.cursor()
-        cursor.execute('INSERT INTO entries (title, latitude, longitude, votes, image_url) VALUES (?, ?, ?, ?, ?);', insertArray)
-        cursor.commit()
+        cursor.execute(
+            'INSERT INTO entries (title, latitude, longitude, votes, image_url) VALUES (?, ?, ?, ?, ?);', insertArray)
+        self.conn.commit()
+        cursor.close()
 
     def deleteEntry(self, ID):
         cursor = self.conn.cursor()
         cursor.execute('DELETE FROM entries WHERE ID = ?', ID)
-        cursor.commit()
+        self.conn.commit()
+        cursor.close()
 
     def updateEntry(self, Entry):
         ID = Entry.id
@@ -143,14 +152,17 @@ class DB:
         updateArray = [ID, title, latitude, longitude, votes, image_url]
 
         cursor = self.conn.cursor()
-        cursor.execute('UPDATE entries SET title = ?, latitude = ?, longitude = ?, votes = ?, image_url = ?;', updateArray)
-        cursor.commit()
-    
+        cursor.execute(
+            'UPDATE entries SET title = ?, latitude = ?, longitude = ?, votes = ?, image_url = ?;', updateArray)
+        self.conn.commit()
+        cursor.close()
+
     def getUser(self, ID):
         cursor = self.conn.cursor()
         cursor.execute('SELECT * FROM users WHERE ID = ?', ID)
 
         result = cursor.fetchall()
+        cursor.close()
         user = User(result[0], result[1], result[2], result[3])
 
         return user
@@ -162,13 +174,16 @@ class DB:
         insertArray = [username, password_salt, password_hash]
 
         cursor = self.conn.cursor()
-        cursor.execute('INSERT INTO user (username, password_salt, password_hash) VALUES (?, ?, ?);', insertArray)
-        cursor.commit()
+        cursor.execute(
+            'INSERT INTO user (username, password_salt, password_hash) VALUES (?, ?, ?);', insertArray)
+        self.conn.commit()
+        cursor.close()
 
     def deleteUser(self, ID):
         cursor = self.conn.cursor()
         cursor.execute('DELETE FROM users WHERE ID = ?', ID)
-        cursor.commit()
+        self.conn.commit()
+        cursor.close()
 
     def getUserLocations(self, ID):
         array_locations = []
@@ -176,13 +191,15 @@ class DB:
         cursor.execute('SELECT * FROM places_visited WHERE userID = ?', ID)
 
         result = cursor.fetchall()
+        cursor.close()
 
         for x in result:
             array_locations.append(x[2])
         return array_locations
-        #should return a list of IDs of places the user has visited
-    
+        # should return a list of IDs of places the user has visited
+
     def deleteUserLocation(self, ID):
         cursor = self.conn.cursor()
         cursor.execute('DELETE FROM places_visited WHERE ID = ?', ID)
-        cursor.commit()
+        self.conn.commit()
+        cursor.close()

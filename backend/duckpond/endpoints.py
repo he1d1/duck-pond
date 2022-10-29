@@ -12,10 +12,14 @@ class Endpoints:
     def __init__(self, app: flask.Flask, database: db.DB):
         self.db = database
 
-        app.add_url_rule(paths.ENTRIES, view_func=self.list_entries, methods=["GET"])
-        app.add_url_rule(paths.GET_ENTRY, view_func=self.get_entry, methods=["GET"])
-        app.add_url_rule(paths.UPDATE_ENTRY, view_func=self.update_entry, methods=["PATCH"])
-        app.add_url_rule(paths.CREATE_ENTRY, view_func=self.create_entry, methods=["POST"])
+        app.add_url_rule(
+            paths.ENTRIES, view_func=self.list_entries, methods=["GET"])
+        app.add_url_rule(
+            paths.GET_ENTRY, view_func=self.get_entry, methods=["GET"])
+        app.add_url_rule(paths.UPDATE_ENTRY,
+                         view_func=self.update_entry, methods=["PATCH"])
+        app.add_url_rule(paths.CREATE_ENTRY,
+                         view_func=self.create_entry, methods=["POST"])
 
     def list_entries(self):
         entries = self.db.getAllEntries()
@@ -55,7 +59,7 @@ class Endpoints:
         if not validation_result:
             return flask.abort(400, error_text)
 
-        self.addEntry(new_entry)
+        self.db.addEntry(new_entry)
 
         return flask.jsonify({
             "id": new_entry.id
