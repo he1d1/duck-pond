@@ -5,14 +5,21 @@
   const { GeolocateControl, NavigationControl, ScaleControl } = controls;
 
   let mapComponent;
-  onMount(() =>
-    mapComponent.flyTo({ center: [-1.8972671999999875, 52.481229569377945] })
-  );
+  onMount(async () => {
+    mapComponent.flyTo({ center: [-1.8972671999999875, 52.481229569377945] });
+    entries = await fetch("http://localhost:8080/entries", {}).then((res) =>
+      res.json()
+    );
+  });
   // Define this to handle `eventname` events - see [GeoLocate Events](https://docs.mapbox.com/mapbox-gl-js/api/markers/#geolocatecontrol-events)
   function eventHandler(e) {
     const data = e.detail;
     // do something with `data`, it's the result returned from the mapbox event
+    console.log(data);
   }
+  let entries: any = [];
+
+  $: console.log(entries);
 </script>
 
 <main class="h-screen flex">
@@ -23,18 +30,19 @@
       <p>Duck Pond</p>
       <p>🦆</p>
     </nav>
-    <article
-      class="bg-gray-100 rounded-lg w-full shadow p-4 flex items-center gap-4 divide-x divide-gray-300"
-    >
-      <article class="flex flex-col items-center text-yellow-500 font-bold">
-        420
-        <small class="font-normal">quacks</small>
+    {#each entries as entry}
+      <article
+        class="bg-gray-100 rounded-lg w-full shadow p-4 flex items-center gap-4 divide-x divide-gray-300"
+      >
+        <article class="flex flex-col items-center text-yellow-500 font-bold">
+          {entry.votes}
+          <small class="font-normal">quacks</small>
+        </article>
+        <article class="pl-4">
+          <h1 class="text-xl font-bold">{entry.name}</h1>
+        </article>
       </article>
-      <article class="pl-4">
-        <h1 class="text-xl font-bold">Hanely Swan Duck Pond</h1>
-        <small class="text-gray-600">0.4 miles · 6 min walk</small>
-      </article>
-    </article>
+    {/each}
   </aside>
 
   <div class="map flex-1">
@@ -44,13 +52,15 @@
       on:recentre={(e) => console.log(e.detail.center.lat, e.detail.center.lng)}
       options={{ scrollZoom: false }}
     >
-      <Marker
-        lat={52}
-        lng={-1.8}
-        color="rgb(255,255,255)"
-        label="Mill Pond11"
-        popupClassName="class-name"
-      />
+      {#each entries as { name, location: { lat, long } }}
+        <Marker
+          {lat}
+          lng={long}
+          color="rgb(255,255,255)"
+          label={`${name} (${lat} ${long})`}
+          popupClassName="class-name"
+        />
+      {/each}
       <NavigationControl />
       <GeolocateControl
         options={{ some: "control-option" }}
@@ -60,11 +70,3 @@
     </Map>
   </div>
 </main>
-
-<style>
-  #map {
-    height: 600px;
-    width: auto;
-    background: #75cff0;
-  }
-</style>
