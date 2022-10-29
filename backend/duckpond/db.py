@@ -169,3 +169,15 @@ class DB:
         cursor = self.conn.cursor()
         cursor.execute('DELETE FROM users WHERE ID = ?', ID)
         cursor.commit()
+
+    def getUserLocations(self, ID):
+        array_locations = []
+        cursor = self.conn.cursor()
+        cursor.execute('SELECT * FROM places_visited WHERE userID = ?', ID)
+
+        result = cursor.fetchall()
+
+        for x in result:
+            array_locations.append(x[2])
+        return array_locations
+        #should return a list of IDs of places the user has visited
