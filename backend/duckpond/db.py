@@ -50,7 +50,7 @@ class DB:
     def __init__(self, filename: str):
         self.conn = sqlite3.connect(filename)
 
-    def _setup(self, filename: str):
+    def _setup(self):
         cursor = self.conn.cursor()
 
         cursor.execute('''
@@ -60,17 +60,34 @@ class DB:
 
         cursor.commit()
 
-    def getEntries(self):
+    def getAllEntries(self):
+        arrayEntries = []
         cursor = self.conn.cursor()
         cursor.execute('SELECT * FROM entries')
 
-        myresult = cursor.fetchall()
+        result = cursor.fetchall()
 
-        for x in myresult:
-            print(x)
+        for x in result:
+            entry = Entry(x[0], x[1], x[2], x[3], x[4], x[5])
+            arrayEntries.append(entry)
+        return arrayEntries
 
-    def addEntry(self, title, latitude, longitude, votes, image_url):
+    def getEntry(self, ID):
+        cursor = self.conn.cursor()
+        cursor.execute('SELECT * FROM entries WHERE ID = ?', ID)
+
+        result = cursor.fetchall()
+
+        return result
+
+    def addEntry(self, Entry):
+        title = Entry.name
+        latitude = Entry.location_lat
+        longitude = Entry.location_long
+        votes = Entry.votes
+        image_url = Entry.image_url
         insertArray = [title, latitude, longitude, votes, image_url]
+
         cursor = self.conn.cursor()
         cursor.execute('INSERT INTO entries (title, latitude, longitude, votes, image_url) VALUES (?, ?, ?, ?, ?);', insertArray)
         cursor.commit()
@@ -80,8 +97,15 @@ class DB:
         cursor.execute('DELETE FROM entries WHERE ID = ?', ID)
         cursor.commit()
 
-    def updateEntry(self, ID, title, latitude, longitude, votes, image_url):
+    def updateEntry(self, Entry):
+        ID = Entry.id
+        title = Entry.name
+        latitude = Entry.location_lat
+        longitude = Entry.location_long
+        votes = Entry.votes
+        image_url = Entry.image_url
         updateArray = [ID, title, latitude, longitude, votes, image_url]
+
         cursor = self.conn.cursor()
         cursor.execute('UPDATE entries SET title = ?, latitude = ?, longitude = ?, votes = ?, image_url = ?;', updateArray)
         cursor.commit()
