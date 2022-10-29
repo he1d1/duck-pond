@@ -60,6 +60,14 @@ class DB:
           CREATE TABLE IF NOT EXISTS entries
           ([ID] INTEGER PRIMARY KEY, [title] TEXT, [latitude] FLOAT, [longitude] FLOAT, [votes] INTEGER, [image_url], STRING)
           ''')
+        cursor.execute('''
+          CREATE TABLE IF NOT EXISTS users
+          ([ID] INTEGER PRIMARY KEY, [username] TEXT, [password_salt] TEXT, [password_hash] TEXT)
+          ''')
+        cursor.execute('''
+          CREATE TABLE IF NOT EXISTS places_visited
+          ([ID] INTEGER PRIMARY KEY, [userID] INTEGER, [entryID] INTEGER)
+          ''')
 
         cursor.commit()
 
