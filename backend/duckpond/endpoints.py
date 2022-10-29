@@ -26,12 +26,9 @@ class Endpoints:
         return flask.jsonify(entries)
 
     def get_entry(self, entry_id: str):
-        # TODO: Fetch from database
+        entry = self.get_entry(entry_id)
 
-        return flask.jsonify({
-            "id": entry_id,
-            "TODO": "TODO"
-        })
+        return flask.jsonify(entry.as_dict())
 
     def update_entry(self):
         return "", 204
@@ -58,9 +55,8 @@ class Endpoints:
         if not validation_result:
             return flask.abort(400, error_text)
 
-        # TODO: store in database
-        # TODO: Form responses
+        self.addEntry(new_entry)
 
         return flask.jsonify({
-            "id": uuid.uuidv4()
+            "id": new_entry.id
         })
