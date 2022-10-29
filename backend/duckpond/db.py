@@ -13,7 +13,7 @@ class Entry:
     image_url: Optional[str]
 
     def validate(self, only_populated_fields=False) -> Tuple[bool, str]:
-        if self.name == "" and not only_populated_fields:
+        if (self.name == "" or self.name is None) and not only_populated_fields:
             return False, "name cannot be empty"
         
         if self.votes < 0:
@@ -24,6 +24,9 @@ class Entry:
                 urllib.parse.urlparse(self.image_url)
             except Exception:
                 return False, "invalid URL"
+
+        if self.location_lat is None or self.location_long is None:
+            return False, "missing locations"
 
         return True, ""
 

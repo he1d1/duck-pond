@@ -21,7 +21,7 @@ class Endpoints:
         app.add_url_rule(paths.CREATE_ENTRY, view_func=self.create_entry, methods=["POST"])
 
     def list_entries(self):
-        # TODO: populate from databaase
+       # TODO: populate from databaase 
 
         a = db.Entry("203fc6a0-9587-41a4-9862-e1b72039b98b", "Birmingham Duck Pond", -1.2345, 33.4567, 0, None)
         b = db.Entry("b140e048-ea2c-4827-b670-ef41ba48c56d", "Northwich Duck Pond", -3.2345, 25.4567, 0, None)
@@ -44,7 +44,22 @@ class Endpoints:
         if body is None:
             return "no JSON body", 400
 
-        # TODO: validate inputs
+        coordinates = body.get("location", None)
+        if coordinates is None:
+            return "missing location", 400
+
+        new_entry = db.Entry(
+            uuid.uuid4(),
+            body.get("name"),
+            coordinates.get("lat"),
+            coordinates.get("long"),
+            0,
+            body.get("imageURL"))
+
+        validation_result, error_text = new_entry.validate()
+
+        if not validation_result:
+            return flask.abort(400, error_text)
 
         # TODO: store in database
 
