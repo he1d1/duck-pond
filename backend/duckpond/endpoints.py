@@ -1,9 +1,6 @@
-from re import A
 from typing import *
-import urllib
 import uuid
 import flask
-from dataclasses import dataclass
 
 import db
 import paths
@@ -62,6 +59,7 @@ class Endpoints:
             return flask.abort(400, error_text)
 
         # TODO: store in database
+        # TODO: Form responses
 
         return flask.jsonify({
             "id": uuid.uuidv4()
