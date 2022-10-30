@@ -103,7 +103,7 @@ class DB:
         cursor.execute(
             """
           CREATE TABLE IF NOT EXISTS sessions
-          ([ID] STRING PRIMARY KEY, [userID] STRING, [sessionID] STRING)
+          ([sessionID] STRING PRIMARY KEY, [userID] STRING)
           """
         )
 
@@ -222,3 +222,36 @@ class DB:
         cursor.execute("DELETE FROM places_visited WHERE ID = ?", [ID])
         self.conn.commit()
         cursor.close()
+        
+    def getSession(self, ID):
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM sessions WHERE sessionID = ?", [ID])
+
+        result = cursor.fetchall()
+        cursor.close()
+        
+        if len(result) == 0:
+            return None
+        else :
+            return result[1]
+    
+    def addSession(self, sessionID, userID):
+        insertArray = [sessionID, userID]
+
+        cursor = self.conn.cursor()
+        cursor.execute(
+            "INSERT INTO sessions (sessionID, userID) VALUES (?, ?);",
+            insertArray,
+        )
+        self.conn.commit()
+        cursor.close()
+    
+    def deleteSession(self, ID):
+        cursor = self.conn.cursor()
+        cursor.execute("DELETE FROM sessions WHERE sessionID = ?", [ID])
+        self.conn.commit()
+        cursor.close()
+        
+    
+        
+    
