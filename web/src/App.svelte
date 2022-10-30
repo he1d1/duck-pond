@@ -66,7 +66,9 @@
             }`}
           >
             <article>
-              <h1 class="text-xl font-bold">{entry.name}</h1>
+              <h1 class="text-xl font-bold">
+                {entry.name}
+              </h1>
               <small class="text-gray-500"
                 >{entry.location.lat} {entry.location.long}</small
               >
@@ -87,6 +89,7 @@
         <input
           type="submit"
           on:click={async () => {
+            state = "LIST";
             const body = {
               id: crypto.randomUUID(),
               name,
@@ -126,15 +129,72 @@
           alt={entries[selection].name}
         />
         <div class="p-4">
-          <h1 class="text-4xl font-bold">{entries[selection].name}</h1>
-          <small class="text-gray-500"
-            >{entries[selection].location.lat}
-            {entries[selection].location.long}</small
-          ><br />
-          <button class="py-3 px-4 rounded-full border-2" on:click={() => {}}
-            >Quack!</button
+          <small>Click to edit</small>
+          <h1
+            class="text-4xl font-bold"
+            contenteditable="true"
+            on:blur={async (event) => {
+              entries[selection].name = event.target.innerHTML;
+              console.log(entries[selection]);
+              console.log(selection);
+              await fetch(
+                "http://localhost:8080/entry/800d2642-3962-459b-b2a5-86a39a3ee476",
+                {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(entries[selection]),
+                }
+              );
+            }}
           >
-          {entries[selection].votes} so far
+            {entries[selection].name}
+          </h1>
+
+          <small class="text-gray-500"
+            >{entries?.[selection].location.lat}
+            {entries?.[selection].location.long}</small
+          ><br />
+          <button
+            class="py-3 px-4 rounded-full border-2"
+            on:click={async () => {
+              entries[selection].votes++;
+              console.log(entries[selection]);
+              console.log(selection);
+              await fetch(
+                `http://localhost:8080/entry/${entries[selection].id}`,
+                {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(entries?.[selection]),
+                }
+              );
+            }}>Quack!</button
+          >
+          {entries?.[selection].votes} so far
+          <br />
+          <button
+            class="py-3 px-4 rounded-full border-2 border-red-500 bg-red-200"
+            on:click={async () => {
+              await fetch(
+                `http://localhost:8080/entry/${entries[selection].id}`,
+                {
+                  method: "DELETE",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                }
+              );
+              state = "LIST";
+
+              entries = entries.filter(
+                (item) => item.id !== entries[selection].id
+              );
+            }}>Delete</button
+          >
         </div>
       </article>
     {/if}
