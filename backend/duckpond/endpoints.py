@@ -43,6 +43,9 @@ class Endpoints:
         app.add_url_rule(
             paths.DELETE_USER, view_func=self.delete_user, methods=["DELETE"]
         )
+        app.add_url_rule(
+            paths.LOGIN, view_func=self.login, methods=["POST"]
+        )
 
     def list_entries(self):
         entries = self.db.getAllEntries()
@@ -146,5 +149,20 @@ class Endpoints:
         body = flask.request.get_json()
         if body is None:
             return flask.abort(400, "no JSON body")
+
+        username = body.get("username")
+        password = body.get("password")
+
+        if username is None or password is None:
+            return flask.abort(400, "missing username or password")
+
+        user = self.db.getUserByUsername(username)
+        
+        hashed_password, _ = _hash_password(password, salt=user.password_salt)
+
+        if user.password_hash != hashed_password:
+            return flask.abort(401, "invalid password")
+
+        # TODO: issue session
 
         return

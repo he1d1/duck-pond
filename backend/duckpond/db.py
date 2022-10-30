@@ -177,6 +177,14 @@ class DB:
 
         return user
 
+    def getUserByUsername(self, username):
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE username = ?", [username])
+
+        result = cursor.fetchone()
+        cursor.close()
+        return User(result[0], result[1], result[2], result[3])
+
     def addUser(self, user):
         insertArray = [user.id, user.username, user.password_salt, user.password_hash]
 
