@@ -33,10 +33,7 @@ class Endpoints:
         entry = self.get_entry(entry_id)
         return flask.jsonify(entry.as_dict())
 
-    def update_entry(self):
-        return "", 204
-
-    def create_entry(self):
+    def _get_entry_from_request(self) -> Union[Tuple[str, int], db.Entry]:
         body = flask.request.get_json()
         if body is None:
             return flask.abort(400, "no JSON body")
@@ -49,8 +46,8 @@ class Endpoints:
             new_entry = db.Entry(
                 uuid.uuid4(),
                 body.get("name"),
-                int(coordinates.get("lat")),
-                int(coordinates.get("long")),
+                float(coordinates.get("lat")),
+                float(coordinates.get("long")),
                 0,
                 body.get("imageURL"),
             )
@@ -61,6 +58,19 @@ class Endpoints:
 
         if not validation_result:
             return flask.abort(400, error_text)
+        
+        return new_entry
+
+    def update_entry(self):
+        return "", 204
+
+    def create_entry(self):
+        res = self._get_entry_from_request()
+
+        if type(res) != db.Entry:
+            return res
+
+        new_entry = res
 
         self.db.addEntry(new_entry)
 
