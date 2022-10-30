@@ -85,19 +85,19 @@ class DB:
         cursor.execute(
             """
           CREATE TABLE IF NOT EXISTS entries
-          ([ID] INTEGER PRIMARY KEY, [title] TEXT, [latitude] FLOAT, [longitude] FLOAT, [votes] INTEGER, [image_url], STRING)
+          ([ID] STRING PRIMARY KEY, [title] TEXT, [latitude] FLOAT, [longitude] FLOAT, [votes] INTEGER, [image_url], STRING)
           """
         )
         cursor.execute(
             """
           CREATE TABLE IF NOT EXISTS users
-          ([ID] INTEGER PRIMARY KEY, [username] TEXT, [password_salt] TEXT, [password_hash] TEXT)
+          ([ID] STRING PRIMARY KEY, [username] TEXT, [password_salt] TEXT, [password_hash] TEXT)
           """
         )
         cursor.execute(
             """
           CREATE TABLE IF NOT EXISTS places_visited
-          ([ID] INTEGER PRIMARY KEY, [userID] INTEGER, [entryID] INTEGER)
+          ([ID] STRING PRIMARY KEY, [userID] STRING, [entryID] STRING)
           """
         )
 
@@ -129,6 +129,7 @@ class DB:
 
     def addEntry(self, entry):
         insertArray = [
+            entry.id,
             entry.name,
             entry.location_lat,
             entry.location_long,
@@ -138,7 +139,7 @@ class DB:
 
         cursor = self.conn.cursor()
         cursor.execute(
-            "INSERT INTO entries (title, latitude, longitude, votes, image_url) VALUES (?, ?, ?, ?, ?);",
+            "INSERT INTO entries (id, title, latitude, longitude, votes, image_url) VALUES (?, ?, ?, ?, ?, ?);",
             insertArray,
         )
         self.conn.commit()
@@ -150,14 +151,8 @@ class DB:
         self.conn.commit()
         cursor.close()
 
-    def updateEntry(self, Entry):
-        ID = Entry.id
-        title = Entry.name
-        latitude = Entry.location_lat
-        longitude = Entry.location_long
-        votes = Entry.votes
-        image_url = Entry.image_url
-        updateArray = [ID, title, latitude, longitude, votes, image_url]
+    def updateEntry(self, entry):
+        updateArray = [entry.name, entry.location_lat, entry.location_long, entry.votes, entry.image_url]
 
         cursor = self.conn.cursor()
         cursor.execute(
@@ -177,15 +172,12 @@ class DB:
 
         return user
 
-    def addUser(self, User):
-        username = User.name
-        password_salt = User.password_salt
-        password_hash = User.password_hash
-        insertArray = [username, password_salt, password_hash]
+    def addUser(self, user):
+        insertArray = [user.id, user.name, user.password_salt, user.password_hash]
 
         cursor = self.conn.cursor()
         cursor.execute(
-            "INSERT INTO user (username, password_salt, password_hash) VALUES (?, ?, ?);",
+            "INSERT INTO user (id, username, password_salt, password_hash) VALUES (? ?, ?, ?);",
             insertArray,
         )
         self.conn.commit()
