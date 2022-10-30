@@ -123,18 +123,14 @@
           class="absolute top-4 right-4 rounded-full bg-gray-100 border-2 aspect-square w-12 h-12"
           >✕</button
         >
-        <img
-          class="object-cover w-full h-[40vmin]"
-          src={entries[selection].imageURL}
-          alt={entries[selection].name}
-        />
+
         <div class="p-4">
           <small>Click to edit</small>
           <h1
             class="text-4xl font-bold"
             contenteditable="true"
             on:blur={async (event) => {
-              entries[selection].name = event.target.innerHTML;
+              entries[selection].name = event.target.innerHTML.split("<br>");
               console.log(entries[selection]);
               console.log(selection);
               await fetch(
@@ -176,25 +172,6 @@
           >
           {entries?.[selection].votes} so far
           <br />
-          <button
-            class="py-3 px-4 rounded-full border-2 border-red-500 bg-red-200"
-            on:click={async () => {
-              await fetch(
-                `http://localhost:8080/entry/${entries[selection].id}`,
-                {
-                  method: "DELETE",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                }
-              );
-              state = "LIST";
-
-              entries = entries.filter(
-                (item) => item.id !== entries[selection].id
-              );
-            }}>Delete</button
-          >
         </div>
       </article>
     {/if}
