@@ -56,3 +56,7 @@ Gets the JSON of the pond.
     "imageURL": "https://example.com"
 }
 ```
+
+### DELETE `/entries/<id>`
+
+Deletes the entry with ID `id`
