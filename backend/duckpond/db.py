@@ -13,8 +13,8 @@ class Entry:
     votes: int
     image_url: Optional[str]
 
-    def validate(self, only_populated_fields=False) -> Tuple[bool, str]:
-        if (self.name == "" or self.name is None) and not only_populated_fields:
+    def validate(self) -> Tuple[bool, str]:
+        if self.name == "" or self.name is None:
             return False, "name cannot be empty"
 
         if self.votes < 0:
@@ -55,8 +55,8 @@ class User:
     password_salt: str
     password_hash: str
 
-    def validate(self, only_populated_fields=False) -> Tuple[bool, str]:
-        if (self.username == "" or self.username is None) and not only_populated_fields:
+    def validate(self) -> Tuple[bool, str]:
+        if self.username == "" or self.username is None:
             return False, "name cannot be empty"
 
         return True, ""
@@ -125,9 +125,10 @@ class DB:
 
     def getEntry(self, ID):
         cursor = self.conn.cursor()
-        cursor.execute("SELECT * FROM entries WHERE ID = ?", ID)
+        cursor.execute("SELECT * FROM entries WHERE ID = ?", [ID])
 
         result = cursor.fetchall()
+        result = result[0]
         cursor.close()
         entry = Entry(result[0], result[1], result[2], result[3], result[4], result[5])
 
@@ -168,20 +169,20 @@ class DB:
 
     def getUser(self, ID):
         cursor = self.conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE ID = ?", ID)
+        cursor.execute("SELECT * FROM users WHERE ID = ?", [ID])
 
-        result = cursor.fetchall()
+        result = cursor.fetchall()[0]
         cursor.close()
         user = User(result[0], result[1], result[2], result[3])
 
         return user
 
     def addUser(self, user):
-        insertArray = [user.id, user.name, user.password_salt, user.password_hash]
+        insertArray = [user.id, user.username, user.password_salt, user.password_hash]
 
         cursor = self.conn.cursor()
         cursor.execute(
-            "INSERT INTO user (id, username, password_salt, password_hash) VALUES (? ?, ?, ?);",
+            "INSERT INTO users (id, username, password_salt, password_hash) VALUES (?, ?, ?, ?);",
             insertArray,
         )
         self.conn.commit()

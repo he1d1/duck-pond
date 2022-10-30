@@ -1,9 +1,22 @@
+from curses import raw
+import os
 from typing import *
 import uuid
 import flask
+import hashlib
 
 import db
 import paths
+
+
+def _hash_password(password: str, salt: Optional[str] = None) -> Tuple[str, str]:
+    if salt is None:
+        salt = os.urandom(32).hex()
+
+    hasher = hashlib.sha256()
+    hasher.update((password + salt).encode())
+
+    return hasher.hexdigest(), salt
 
 
 class Endpoints:
@@ -24,6 +37,13 @@ class Endpoints:
             paths.CREATE_ENTRY, view_func=self.create_entry, methods=["POST"]
         )
 
+        app.add_url_rule(
+            paths.CREATE_USER, view_func=self.create_user, methods=["POST"]
+        )
+        app.add_url_rule(
+            paths.DELETE_USER, view_func=self.delete_user, methods=["DELETE"]
+        )
+
     def list_entries(self):
         entries = self.db.getAllEntries()
 
@@ -33,7 +53,7 @@ class Endpoints:
         return flask.jsonify(entries)
 
     def get_entry(self, entry_id: str):
-        entry = self.get_entry(entry_id)
+        entry = self.db.getEntry(entry_id)
         return flask.jsonify(entry.as_dict())
 
     def _get_entry_from_request(self) -> Union[Tuple[str, int], db.Entry]:
@@ -61,7 +81,7 @@ class Endpoints:
 
         if not validation_result:
             return flask.abort(400, error_text)
-
+ 
         return new_entry
 
     def update_entry(self, entry_id: str):
@@ -82,7 +102,7 @@ class Endpoints:
         res = self._get_entry_from_request()
 
         if type(res) != db.Entry:
-            return res
+            return flask.abot(res[1], res[0])
 
         new_entry = res
 
@@ -93,3 +113,38 @@ class Endpoints:
     def delete_entry(self, entry_id: str):
         self.db.deleteEntry(entry_id)
         return "", 204
+
+    def create_user(self):
+        body = flask.request.get_json()
+        if body is None:
+            return flask.abort(400, "no JSON body")
+
+        raw_password = body.get("password")
+        if raw_password is None:
+            return flask.abort(400, "missing password")
+
+        password_hash, salt = _hash_password(raw_password)
+
+        new_user = db.User(
+            str(uuid.uuid4()),
+            body.get("username"),
+            salt,
+            password_hash,
+        )
+
+        self.db.addUser(new_user)
+
+        return flask.jsonify({
+            "id": new_user.id,
+        })
+
+    def delete_user(self, user_id: str):
+        self.db.deleteUser(user_id)
+        return "", 204
+
+    def login(self):
+        body = flask.request.get_json()
+        if body is None:
+            return flask.abort(400, "no JSON body")
+
+        return
