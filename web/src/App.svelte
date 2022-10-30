@@ -19,53 +19,152 @@
   }
   let entries: any = [];
 
-  $: console.log(entries);
+  let selection = null;
+  let selectionEntry = null;
+
+  let state = "LIST";
+
+  let lastClick = null;
+
+  let name, imageURL, lat, long;
 </script>
 
-<main class="h-screen flex">
-  <aside
-    class="h-screen md:w-2/3 lg:w-1/2 xl:w-1/3 w-full bg-gray-200 p-4 flex flex-col gap-4"
+<main class="h-screen flex text-gray-900">
+  <button
+    on:click={() => (state = state === "MAP" ? "LIST" : "MAP")}
+    class="absolute top-1/2 left-0 z-10 rounded-r-xl bg-gray-100 border-2 aspect-square w-8 h-24 transition-transform -translate-y-1/2"
+    ><span>{state === "MAP" ? `>` : `<`}</span></button
   >
-    <nav class="-m-4 mb-0 p-4 bg-gray-100 shadow flex justify-between">
-      <p>Duck Pond</p>
-      <p>🦆</p>
-    </nav>
-    {#each entries as entry}
-      <article
-        class="bg-gray-100 rounded-lg w-full shadow p-4 flex items-center gap-4 divide-x divide-gray-300"
-      >
-        <article class="flex flex-col items-center text-yellow-500 font-bold">
-          {entry.votes}
-          <small class="font-normal">quacks</small>
-        </article>
-        <article class="pl-4">
-          <h1 class="text-xl font-bold">{entry.name}</h1>
-        </article>
-      </article>
-    {/each}
-  </aside>
+  {#if state !== "MAP"}
+    <aside
+      on:click={() => (selection = null)}
+      class={`h-screen md:w-2/3 lg:w-1/2 xl:w-1/3 w-full bg-gray-200 p-4 flex flex-col gap-4 ${
+        selection !== null ? "hidden lg:block" : ""
+      }`}
+    >
+      <nav class="-m-4 mb-0 p-4 bg-gray-100 shadow flex justify-between">
+        <p>Duck Pond</p>
+        <p>🦆</p>
+      </nav>
 
-  <div class="map flex-1">
+      <button
+        on:click={() => {
+          state = state === "CREATE" ? "LIST" : "CREATE";
+          lastClick = null;
+        }}
+        class={`absolute bottom-4 left-4 rounded-full bg-gray-100 border-2 aspect-square w-12 h-12 transition-transform ${
+          state === "CREATE" ? "" : "-rotate-45"
+        }`}>✕</button
+      >
+      {#if state === "LIST"}
+        {#each entries as entry, i}
+          <article
+            on:click|stopPropagation={() => (selection = i)}
+            class={`bg-gray-100 rounded-lg w-full shadow p-4 flex items-center justify-between gap-4 ${
+              selection === i ? "border-yellow-600" : ""
+            }`}
+          >
+            <article>
+              <h1 class="text-xl font-bold">{entry.name}</h1>
+              <small class="text-gray-500"
+                >{entry.location.lat} {entry.location.long}</small
+              >
+            </article>
+            <article
+              class="flex flex-col items-center text-yellow-600 font-bold"
+            >
+              {entry.votes}
+              <small class="font-normal">quacks</small>
+            </article>
+          </article>
+        {/each}
+      {:else if state === "CREATE"}
+        <input type="text" name="name" bind:value={name} />
+        <input type="text" name="imageUrl" bind:value={imageURL} />
+        <input type="number" name="latitude" bind:value={lat} />
+        <input type="number" name="longitude" bind:value={long} />
+        <input
+          type="submit"
+          on:click={async () => {
+            const body = {
+              id: crypto.randomUUID(),
+              name,
+              imageURL,
+              location: {
+                lat,
+                long,
+              },
+              votes: 0,
+            };
+            await fetch("http://localhost:8080/entry", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(body),
+            });
+            entries = [...entries, body];
+          }}
+        />
+      {:else if state === "MAP"}{/if}
+    </aside>
+  {/if}
+  <div class="map flex-1 relative">
+    {#if selection !== null}
+      <article
+        class="z-10 absolute inset-0 m-4 bg-gray-100 rounded-xl shadow border-2 overflow-hidden"
+      >
+        <button
+          on:click={() => (selection = null)}
+          class="absolute top-4 right-4 rounded-full bg-gray-100 border-2 aspect-square w-12 h-12"
+          >✕</button
+        >
+        <img
+          class="object-cover w-full h-[40vmin]"
+          src={entries[selection].imageURL}
+        />
+        <div class="p-4">
+          <h1 class="text-4xl font-bold">{entries[selection].name}</h1>
+          <button
+            class="py-3 px-4 rounded-full border-2"
+            on:click={() => {
+              console.log("honk");
+            }}>Quack!</button
+          >
+          {entries[selection].votes} so far
+        </div>
+      </article>
+    {/if}
     <Map
       accessToken={import.meta.env.VITE_KEY}
       bind:this={mapComponent}
-      on:recentre={(e) => console.log(e.detail.center.lat, e.detail.center.lng)}
-      options={{ scrollZoom: false }}
+      on:click={({ layerX: x, layerY: y }) => {
+        lastClick = [x, y];
+      }}
+      options={{ scrollZoom: true }}
     >
-      {#each entries as { name, location: { lat, long } }}
+      {#each entries as { name, location: { lat, long } }, i}
         <Marker
           {lat}
           lng={long}
           color="rgb(255,255,255)"
           label={`${name} (${lat} ${long})`}
           popupClassName="class-name"
-        />
+        >
+          <button
+            class="bg-gray-100 px-3 py-2 rounded-full border-2"
+            on:click={() => {
+              selection = i;
+              state = "LIST";
+              mapComponent.flyTo({ center: [long, lat] });
+            }}
+          >
+            {name}
+          </button>
+        </Marker>
       {/each}
       <NavigationControl />
-      <GeolocateControl
-        options={{ some: "control-option" }}
-        on:eventname={eventHandler}
-      />
+      <GeolocateControl on:click={eventHandler} />
       <ScaleControl />
     </Map>
   </div>
