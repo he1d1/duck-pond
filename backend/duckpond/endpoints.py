@@ -18,6 +18,9 @@ class Endpoints:
             paths.UPDATE_ENTRY, view_func=self.update_entry, methods=["PUT"]
         )
         app.add_url_rule(
+            paths.DELETE_ENTRY, view_func=self.delete_entry, methods=["DELETE"]
+        )
+        app.add_url_rule(
             paths.CREATE_ENTRY, view_func=self.create_entry, methods=["POST"]
         )
 
@@ -86,3 +89,7 @@ class Endpoints:
         self.db.addEntry(new_entry)
 
         return flask.jsonify({"id": new_entry.id})
+
+    def delete_entry(self, entry_id: str):
+        self.db.deleteEntry(entry_id)
+        return "", 204

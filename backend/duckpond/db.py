@@ -145,19 +145,17 @@ class DB:
         self.conn.commit()
         cursor.close()
 
-    def deleteEntry(self, ID):
+    def deleteEntry(self, entry_id):
         cursor = self.conn.cursor()
-        cursor.execute("DELETE FROM entries WHERE ID = ?", ID)
+        cursor.execute("DELETE FROM entries WHERE ID = ?", [entry_id])
         self.conn.commit()
         cursor.close()
 
     def updateEntry(self, entry):
-        updateArray = [entry.name, entry.location_lat, entry.location_long, entry.votes, entry.image_url]
-
         cursor = self.conn.cursor()
         cursor.execute(
             "UPDATE entries SET title = ?, latitude = ?, longitude = ?, votes = ?, image_url = ?;",
-            updateArray,
+            [entry.name, entry.location_lat, entry.location_long, entry.votes, entry.image_url],
         )
         self.conn.commit()
         cursor.close()
