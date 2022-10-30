@@ -85,7 +85,7 @@ class DB:
         cursor.execute(
             """
           CREATE TABLE IF NOT EXISTS entries
-          ([ID] STRING PRIMARY KEY, [title] TEXT, [latitude] FLOAT, [longitude] FLOAT, [votes] INTEGER, [image_url], STRING)
+          ([ID] STRING PRIMARY KEY, [title] TEXT, [latitude] FLOAT, [longitude] FLOAT, [votes] INTEGER, [image_url] STRING)
           """
         )
         cursor.execute(
