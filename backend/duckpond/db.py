@@ -100,6 +100,12 @@ class DB:
           ([ID] STRING PRIMARY KEY, [userID] STRING, [entryID] STRING)
           """
         )
+        cursor.execute(
+            """
+          CREATE TABLE IF NOT EXISTS sessions
+          ([ID] STRING PRIMARY KEY, [userID] STRING, [sessionID] STRING)
+          """
+        )
 
         self.conn.commit()
         cursor.close()
@@ -184,6 +190,17 @@ class DB:
     def deleteUser(self, ID):
         cursor = self.conn.cursor()
         cursor.execute("DELETE FROM users WHERE ID = ?", [ID])
+        self.conn.commit()
+        cursor.close()
+        
+    def addUserLocations(self, userlocation):
+        insertArray = [userlocation.id, userlocation.userID, userlocation.entryID]
+
+        cursor = self.conn.cursor()
+        cursor.execute(
+            "INSERT INTO places_visited (id, userID, entryID) VALUES (?, ?, ?);",
+            insertArray,
+        )
         self.conn.commit()
         cursor.close()
 
