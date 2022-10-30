@@ -53,11 +53,6 @@ class Endpoints:
             )
         except ValueError:
             return flask.abort(400, "invalid coordinate format")
-
-        validation_result, error_text = new_entry.validate()
-
-        if not validation_result:
-            return flask.abort(400, error_text)
         
         return new_entry
 
@@ -71,6 +66,11 @@ class Endpoints:
             return res
 
         new_entry = res
+
+        validation_result, error_text = new_entry.validate()
+
+        if not validation_result:
+            return flask.abort(400, error_text)
 
         self.db.addEntry(new_entry)
 
