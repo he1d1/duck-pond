@@ -154,8 +154,8 @@ class DB:
     def updateEntry(self, entry):
         cursor = self.conn.cursor()
         cursor.execute(
-            "UPDATE entries SET title = ?, latitude = ?, longitude = ?, votes = ?, image_url = ?;",
-            [entry.name, entry.location_lat, entry.location_long, entry.votes, entry.image_url],
+            "UPDATE entries SET title = ?, latitude = ?, longitude = ?, votes = ?, image_url = ? WHERE id = ?;",
+            [entry.name, entry.location_lat, entry.location_long, entry.votes, entry.image_url, entry.id],
         )
         self.conn.commit()
         cursor.close()
