@@ -1,3 +1,4 @@
+import os
 import sqlite3
 from dataclasses import dataclass
 from typing import *
@@ -244,8 +245,8 @@ class DB:
         else :
             return result[1]
     
-    def addSession(self, sessionID, userID):
-        insertArray = [sessionID, userID]
+    def addSession(self, userID) -> str:
+        insertArray = [os.urandom(64).hex(), userID]
 
         cursor = self.conn.cursor()
         cursor.execute(
@@ -254,6 +255,8 @@ class DB:
         )
         self.conn.commit()
         cursor.close()
+
+        return insertArray[0]
     
     def deleteSession(self, ID):
         cursor = self.conn.cursor()

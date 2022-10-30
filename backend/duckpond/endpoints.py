@@ -163,6 +163,8 @@ class Endpoints:
         if user.password_hash != hashed_password:
             return flask.abort(401, "invalid password")
 
-        # TODO: issue session
+        sesison_token = self.db.addSession(user.id)
 
-        return
+        return flask.jsonify({
+            "session_token": sesison_token,
+        })
