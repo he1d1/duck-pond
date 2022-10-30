@@ -36,9 +36,10 @@
     ><span>{state === "MAP" ? `>` : `<`}</span></button
   >
   {#if state !== "MAP"}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <aside
       on:click={() => (selection = null)}
-      class={`h-screen md:w-2/3 lg:w-1/2 xl:w-1/3 w-full bg-gray-200 p-4 flex flex-col gap-4 ${
+      class={`h-screen md:w-2/3 lg:w-1/2 xl:w-1/3 w-full bg-gray-200 p-4 flex flex-col gap-4 overflow-y-auto ${
         selection !== null ? "hidden lg:block" : ""
       }`}
     >
@@ -109,7 +110,7 @@
       {:else if state === "MAP"}{/if}
     </aside>
   {/if}
-  <div class="map flex-1 relative">
+  <div class="map flex-1 relative w-full">
     {#if selection !== null}
       <article
         class="z-10 absolute inset-0 m-4 bg-gray-100 rounded-xl shadow border-2 overflow-hidden"
@@ -122,14 +123,12 @@
         <img
           class="object-cover w-full h-[40vmin]"
           src={entries[selection].imageURL}
+          alt={entries[selection].name}
         />
         <div class="p-4">
           <h1 class="text-4xl font-bold">{entries[selection].name}</h1>
-          <button
-            class="py-3 px-4 rounded-full border-2"
-            on:click={() => {
-              console.log("honk");
-            }}>Quack!</button
+          <button class="py-3 px-4 rounded-full border-2" on:click={() => {}}
+            >Quack!</button
           >
           {entries[selection].votes} so far
         </div>
