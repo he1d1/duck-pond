@@ -40,7 +40,7 @@
     <aside
       on:click={() => (selection = null)}
       class={`h-screen md:w-2/3 lg:w-1/2 xl:w-1/3 w-full bg-gray-200 p-4 flex flex-col gap-4 overflow-y-auto ${
-        selection !== null ? "hidden lg:block" : ""
+        selection !== null ? "hidden lg:flex" : ""
       }`}
     >
       <nav class="-m-4 mb-0 p-4 bg-gray-100 shadow flex justify-between">
@@ -127,6 +127,10 @@
         />
         <div class="p-4">
           <h1 class="text-4xl font-bold">{entries[selection].name}</h1>
+          <small class="text-gray-500"
+            >{entries[selection].location.lat}
+            {entries[selection].location.long}</small
+          ><br />
           <button class="py-3 px-4 rounded-full border-2" on:click={() => {}}
             >Quack!</button
           >
