@@ -183,14 +183,14 @@ class DB:
 
     def deleteUser(self, ID):
         cursor = self.conn.cursor()
-        cursor.execute("DELETE FROM users WHERE ID = ?", ID)
+        cursor.execute("DELETE FROM users WHERE ID = ?", [ID])
         self.conn.commit()
         cursor.close()
 
     def getUserLocations(self, ID):
         array_locations = []
         cursor = self.conn.cursor()
-        cursor.execute("SELECT * FROM places_visited WHERE userID = ?", ID)
+        cursor.execute("SELECT * FROM places_visited WHERE userID = ?", [ID])
 
         result = cursor.fetchall()
         cursor.close()
@@ -202,6 +202,6 @@ class DB:
 
     def deleteUserLocation(self, ID):
         cursor = self.conn.cursor()
-        cursor.execute("DELETE FROM places_visited WHERE ID = ?", ID)
+        cursor.execute("DELETE FROM places_visited WHERE ID = ?", [ID])
         self.conn.commit()
         cursor.close()
