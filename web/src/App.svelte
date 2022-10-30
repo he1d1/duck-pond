@@ -58,7 +58,7 @@
         }`}>✕</button
       >
       {#if state === "LIST"}
-        {#each entries as entry, i}
+        {#each entries.sort((a, b) => b.votes - a.votes) as entry, i}
           <article
             on:click|stopPropagation={() => (selection = i)}
             class={`bg-gray-100 rounded-lg w-full shadow p-4 flex items-center justify-between gap-4 ${
@@ -130,7 +130,10 @@
             class="text-4xl font-bold"
             contenteditable="true"
             on:blur={async (event) => {
-              entries[selection].name = event.target.innerHTML.split("<br>");
+              entries[selection].name = event.target.innerHTML
+                .split("<br>")
+                .filter((i) => i !== "<br>")
+                .join("");
               console.log(entries[selection]);
               console.log(selection);
               await fetch(
