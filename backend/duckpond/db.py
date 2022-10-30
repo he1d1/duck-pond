@@ -122,13 +122,8 @@ class DB:
 
         return entry
 
-    def addEntry(self, Entry):
-        title = Entry.name
-        latitude = Entry.location_lat
-        longitude = Entry.location_long
-        votes = Entry.votes
-        image_url = Entry.image_url
-        insertArray = [title, latitude, longitude, votes, image_url]
+    def addEntry(self, entry):
+        insertArray = [entry.name, entry.location_lat, entry.location_long, entry.votes, entry.image_url]
 
         cursor = self.conn.cursor()
         cursor.execute(

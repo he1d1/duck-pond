@@ -31,7 +31,6 @@ class Endpoints:
 
     def get_entry(self, entry_id: str):
         entry = self.get_entry(entry_id)
-
         return flask.jsonify(entry.as_dict())
 
     def update_entry(self):
@@ -40,19 +39,23 @@ class Endpoints:
     def create_entry(self):
         body = flask.request.get_json()
         if body is None:
-            return "no JSON body", 400
+            return flask.abort(400, "no JSON body")
 
         coordinates = body.get("location", None)
         if coordinates is None:
-            return "missing location", 400
+            return flask.abort(400, "missing location")
 
-        new_entry = db.Entry(
-            uuid.uuid4(),
-            body.get("name"),
-            coordinates.get("lat"),
-            coordinates.get("long"),
-            0,
-            body.get("imageURL"))
+        try:
+            new_entry = db.Entry(
+                uuid.uuid4(),
+                body.get("name"),
+                int(coordinates.get("lat")),
+                int(coordinates.get("long")),
+                0,
+                body.get("imageURL"),
+            )
+        except ValueError:
+            return flask.abort(400, "invalid coordinate format")
 
         validation_result, error_text = new_entry.validate()
 
