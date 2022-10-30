@@ -6,7 +6,7 @@
 
 Gets a list of all the duck ponds in the database.
 
-### POST `/entries/<id>/new`
+### POST `/entry/<id>/new`
 
 Creates a new duck pond entry.
 
@@ -31,7 +31,7 @@ Return sample:
 }
 ```
 
-### PATCH `/entries/<id>`
+### PATCH `/entry/<id>`
 
 Updates an entry with the ID `id`.
 
@@ -41,7 +41,7 @@ JSON body arguments:
 * `imageURL`
 * `votes`
 
-### GET `/entries/<id>`
+### GET `/entry/<id>`
 
 Gets the JSON of the pond.
 
@@ -57,6 +57,6 @@ Gets the JSON of the pond.
 }
 ```
 
-### DELETE `/entries/<id>`
+### DELETE `/entry/<id>`
 
 Deletes the entry with ID `id`
